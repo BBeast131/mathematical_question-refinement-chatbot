@@ -72,6 +72,7 @@ class ValidationResponse(BaseModel):
     is_valid: bool
     message: str
     reasoning: Optional[str] = None
+    suggestions: Optional[str] = None
 
 
 class RefinementResponse(BaseModel):
@@ -111,7 +112,8 @@ async def validate_question(user_message: UserMessage):
         return ValidationResponse(
             is_valid=result["is_valid"],
             message=result["message"],
-            reasoning=result.get("reasoning")
+            reasoning=result.get("reasoning"),
+            suggestions=result.get("suggestions", "")
         )
     except Exception as e:
         logger.error(f"Validation error: {str(e)}")

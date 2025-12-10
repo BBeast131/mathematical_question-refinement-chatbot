@@ -49,24 +49,32 @@ class ValidationService:
 
 A valid mathematical question should:
 1. Be clearly stated and grammatically correct
-2. Contain mathematical content (concepts, problems, proofs, computations, etc.)
+2. Contain mathematical content (concepts, problems, proofs, computations, theorems, definitions, etc.)
 3. Be answerable or discussable in a mathematical context
 4. Not be just a casual conversation or non-mathematical query
+5. Have sufficient context to be understood as a mathematical question
 
 Examples of VALID mathematical questions:
 - "What is the derivative of x^2?"
 - "Prove that the square root of 2 is irrational"
 - "How do I solve the equation 2x + 3 = 7?"
 - "Explain the concept of limits in calculus"
+- "What is the integral of sin(x) from 0 to π?"
+- "Show that every bounded sequence in ℝⁿ has a convergent subsequence"
 
 Examples of INVALID inputs:
-- "Hello, how are you?"
-- "What's the weather today?"
-- "Tell me a joke"
-- Just numbers or symbols without context: "2+2"
+- "Hello, how are you?" (casual conversation)
+- "What's the weather today?" (non-mathematical)
+- "Tell me a joke" (non-mathematical)
+- Just numbers or symbols without context: "2+2" (not a question)
+- Empty or very short inputs without mathematical content
+
+Be strict but fair - if the input has mathematical intent, even if poorly worded, it should be considered valid.
+
+OUTPUT FORMAT: Respond with ONLY valid JSON in the exact format specified. No markdown, no code blocks, no explanatory text.
 
 {format_instructions}"""),
-            ("human", "User input: {user_input}\n\nAnalyze this input and determine if it is a valid mathematical question.")
+            ("human", "User input: {user_input}\n\nAnalyze this input and determine if it is a valid mathematical question. Provide clear reasoning and helpful suggestions if invalid. Respond with ONLY the JSON object, no other text.")
         ])
     
     async def validate(self, user_input: str) -> Dict[str, Any]:
@@ -93,7 +101,7 @@ Examples of INVALID inputs:
             
             # Format response message
             if result.is_valid:
-                message = "✓ Your question is valid! Let's proceed to refinement."
+                message = "✓ Your question is valid! Confirming and proceeding to refinement."
             else:
                 message = f"✗ Your input doesn't appear to be a valid mathematical question. {result.suggestions}"
             
