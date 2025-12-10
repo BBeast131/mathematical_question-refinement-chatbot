@@ -26,10 +26,34 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Initialize services
-validation_service = ValidationService()
-refinement_service = RefinementService()
-similarity_service = SimilarityService()
+# Initialize services (lazy initialization on first use)
+validation_service = None
+refinement_service = None
+similarity_service = None
+
+
+def get_validation_service():
+    """Get or initialize validation service"""
+    global validation_service
+    if validation_service is None:
+        validation_service = ValidationService()
+    return validation_service
+
+
+def get_refinement_service():
+    """Get or initialize refinement service"""
+    global refinement_service
+    if refinement_service is None:
+        refinement_service = RefinementService()
+    return refinement_service
+
+
+def get_similarity_service():
+    """Get or initialize similarity service"""
+    global similarity_service
+    if similarity_service is None:
+        similarity_service = SimilarityService()
+    return similarity_service
 
 
 class UserMessage(BaseModel):
@@ -75,7 +99,8 @@ async def validate_question(user_message: UserMessage):
     """
     try:
         logger.info(f"Validating question: {user_message.message[:100]}...")
-        result = await validation_service.validate(user_message.message)
+        service = get_validation_service()
+        result = await service.validate(user_message.message)
         return ValidationResponse(
             is_valid=result["is_valid"],
             message=result["message"],
@@ -93,7 +118,8 @@ async def refine_question(user_message: UserMessage):
     """
     try:
         logger.info(f"Refining question: {user_message.message[:100]}...")
-        result = await refinement_service.refine(user_message.message)
+        service = get_refinement_service()
+        result = await service.refine(user_message.message)
         return RefinementResponse(
             refined_question=result["refined_question"],
             changes_made=result["changes_made"],
@@ -112,7 +138,8 @@ async def check_similarity(user_message: UserMessage):
     """
     try:
         logger.info(f"Checking similarity for: {user_message.message[:100]}...")
-        results = await similarity_service.find_similar(user_message.message, threshold=0.8)
+        service = get_similarity_service()
+        results = await service.find_similar(user_message.message, threshold=0.8)
         
         similar_questions = [
             SimilarityResult(

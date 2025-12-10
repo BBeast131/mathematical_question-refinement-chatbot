@@ -3,8 +3,8 @@ Service for refining mathematical questions using LangChain and Groq
 """
 import os
 from langchain_groq import ChatGroq
-from langchain.prompts import ChatPromptTemplate
-from langchain.output_parsers import PydanticOutputParser
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import PydanticOutputParser
 from pydantic import BaseModel, Field
 from typing import Dict, Any
 import logging
@@ -29,7 +29,7 @@ class RefinementService:
             raise ValueError("GROQ_API_KEY environment variable is not set")
         
         self.llm = ChatGroq(
-            model_name="llama-3.1-70b-versatile",
+            model="llama-3.1-70b-versatile",
             groq_api_key=api_key,
             temperature=0.3  # Slightly higher for creative refinement
         )

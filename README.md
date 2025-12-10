@@ -63,11 +63,10 @@ question.json              # Sample mathematical questions database
 
 1. **Start the backend server**:
    ```bash
-   cd backend
-   python main.py
-   ```
-   Or using uvicorn directly:
-   ```bash
+   # Recommended: Use the run script
+   python run_server.py
+   
+   # Or using uvicorn directly:
    uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000
    ```
 
@@ -154,28 +153,143 @@ Finds semantically similar questions.
 }
 ```
 
-## Design Decisions
+## Design Decisions & Explainability
 
-### Backend Architecture
-- **FastAPI**: Modern, fast Python web framework with automatic API documentation
-- **LangChain**: Provides structured workflows for LLM interactions
-- **Groq API**: Fast inference with LLaMA models (alternative to GPT-5)
-- **Service Layer**: Separated concerns (validation, refinement, similarity)
+### Architecture and Design Clarity
 
-### Similarity Check
-- **SentenceTransformers**: Uses `all-MiniLM-L6-v2` for generating embeddings
-- **FAISS**: Efficient similarity search with cosine similarity
-- **Threshold**: 80% similarity threshold as specified
+The application follows a **service-oriented architecture** with clear separation of concerns:
 
-### Frontend
-- **Vanilla JavaScript**: Simple, no framework dependencies
-- **State Management**: Client-side state machine for conversation flow
-- **UX**: Clear visual feedback, action buttons, status indicators
+1. **API Layer** (`backend/main.py`): Handles HTTP requests/responses, routing, and error handling
+2. **Service Layer** (`backend/services/`): Contains business logic for each workflow step
+   - `validation_service.py`: Validates mathematical questions
+   - `refinement_service.py`: Refines questions for quality
+   - `similarity_service.py`: Finds similar questions using embeddings
+3. **Frontend Layer** (`frontend/`): Manages user interaction and conversation state
+
+This separation allows:
+- Easy testing of individual components
+- Clear responsibility boundaries
+- Simple extension with new features
+- Independent scaling of services
+
+### LangChain Integration
+
+**Validation Workflow:**
+- Uses `ChatPromptTemplate` for structured prompt management
+- Implements `PydanticOutputParser` for type-safe LLM responses
+- Creates a chain: `Prompt → LLM → Parser` using LangChain's pipe operator (`|`)
+- Async support with `ainvoke()` for non-blocking operations
+
+**Refinement Workflow:**
+- Similar chain structure but with different prompt and output schema
+- Temperature set to 0.3 (vs 0.1 for validation) to allow creative improvements
+- Preserves mathematical meaning while improving presentation
+
+**Why LangChain?**
+- Standardized interface for LLM interactions
+- Built-in support for structured outputs (Pydantic)
+- Easy to swap LLM providers (Groq, OpenAI, etc.)
+- Chain composition enables complex workflows
 
 ### Prompt Design
-- **Validation Prompt**: Clear criteria for valid mathematical questions
-- **Refinement Prompt**: Focuses on grammar, clarity, formatting while preserving meaning
-- **Structured Output**: Uses Pydantic models for consistent LLM responses
+
+**Validation Prompt Strategy:**
+- **System message** defines the role (expert mathematician/educator)
+- **Clear criteria** for valid mathematical questions (4 key points)
+- **Examples** of valid and invalid inputs for few-shot learning
+- **Structured output** ensures consistent JSON responses
+
+**Refinement Prompt Strategy:**
+- **Editor role** emphasizes grammar, clarity, formatting
+- **Explicit guidelines** (6 do's and 4 don'ts) to prevent over-editing
+- **Preservation constraint** ensures mathematical content isn't altered
+- **Change tracking** in output helps users understand improvements
+
+**Design Rationale:**
+- Prompts are self-contained and don't rely on conversation history
+- Clear boundaries prevent prompt injection
+- Structured outputs reduce parsing errors
+- Examples guide the model's behavior
+
+### Error Handling Strategy
+
+**Multi-layer Error Handling:**
+
+1. **Service Level:**
+   - Try-catch blocks around LLM calls
+   - Fallback validation (length check) if LLM fails
+   - Graceful degradation (return original question if refinement fails)
+
+2. **API Level:**
+   - HTTP exception handling with meaningful error messages
+   - Logging for debugging without exposing internals
+   - Input validation via Pydantic models
+
+3. **Frontend Level:**
+   - User-friendly error messages
+   - Status indicators (loading, error, success)
+   - Retry mechanisms for failed requests
+
+**Why This Approach:**
+- Users always get a response (even if degraded)
+- Errors are logged for debugging
+- System remains functional even if one component fails
+
+### Semantic Similarity Logic
+
+**Embedding Model Choice:**
+- **`all-MiniLM-L6-v2`**: 384-dimensional embeddings, fast inference
+- Pre-trained on diverse text, good for mathematical content
+- Small model size (~80MB) for quick loading
+
+**FAISS Index:**
+- **IndexFlatIP**: Inner product for cosine similarity (after L2 normalization)
+- Pre-computed index for fast similarity search
+- Handles 10+ questions efficiently (scales to thousands)
+
+**Similarity Calculation:**
+1. Normalize embeddings (L2 normalization)
+2. Use inner product (equivalent to cosine similarity for normalized vectors)
+3. Filter by threshold (0.8 = 80% similarity)
+4. Sort by similarity score (descending)
+
+**Why This Approach:**
+- Semantic understanding (not just keyword matching)
+- Fast search even with large question databases
+- Configurable threshold for different use cases
+- Returns ranked results for user review
+
+### UI Simplicity and Usability
+
+**Design Principles:**
+- **Minimal but functional**: Focus on conversation flow, not flashy UI
+- **Clear visual hierarchy**: Bot vs user messages, status indicators
+- **Action buttons**: Quick accept/reject for refinement
+- **Real-time feedback**: Status bar shows current operation
+- **Conversation history**: Scrollable chat for context
+
+**State Management:**
+- Client-side state machine tracks conversation phase
+- Prevents invalid state transitions
+- Handles user responses appropriately based on phase
+
+**User Experience Flow:**
+1. User enters question → Validation
+2. If invalid → Request revision (loop)
+3. If valid → Show refinement
+4. User accepts/rejects → Similarity check or new refinement
+5. Show similar questions → Complete
+
+### Completeness Checklist
+
+✅ **User Input Phase**: Chatbot prompts for question  
+✅ **Validation Loop**: Backend validates, loops until valid  
+✅ **Refinement Phase**: Refines question, allows accept/reject  
+✅ **Similarity Check**: Semantic similarity with >80% threshold  
+✅ **UI**: Chat interface with conversation history  
+✅ **LangChain Integration**: Proper chains for validation and refinement  
+✅ **Error Handling**: Graceful degradation and user-friendly messages  
+✅ **Documentation**: README with setup and design explanations
 
 ## Error Handling
 

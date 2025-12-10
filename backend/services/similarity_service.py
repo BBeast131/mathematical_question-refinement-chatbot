@@ -38,18 +38,24 @@ class SimilarityService:
     def _load_questions(self) -> List[Dict[str, Any]]:
         """Load questions from JSON file"""
         try:
+            # Get the project root (parent of backend directory)
+            current_file = Path(__file__)
+            backend_dir = current_file.parent.parent  # Go up from services/ to backend/
+            project_root = backend_dir.parent  # Go up from backend/ to project root
+            
             # Try multiple possible paths
             possible_paths = [
-                Path(self.questions_file),
-                Path("question.json"),
-                Path("questions.json"),
-                Path("backend") / "question.json",
-                Path("backend") / "questions.json",
+                project_root / self.questions_file,
+                project_root / "question.json",
+                project_root / "questions.json",
+                Path(self.questions_file),  # Absolute path
+                Path("question.json"),  # Current directory
+                Path("questions.json"),  # Current directory
             ]
             
             for path in possible_paths:
                 if path.exists():
-                    logger.info(f"Loading questions from {path}")
+                    logger.info(f"Loading questions from {path.absolute()}")
                     with open(path, 'r', encoding='utf-8') as f:
                         return json.load(f)
             
