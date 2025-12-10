@@ -6,6 +6,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 import logging
+import os
+from pathlib import Path
+from dotenv import load_dotenv
+
+# Load .env file from project root (parent of backend directory)
+env_path = Path(__file__).parent.parent / '.env'
+load_dotenv(dotenv_path=env_path)
 
 from services.validation_service import ValidationService
 from services.refinement_service import RefinementService
@@ -197,5 +204,5 @@ async def chat(user_message: UserMessage):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="127.0.0.1", port=8000)
 

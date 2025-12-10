@@ -1,70 +1,70 @@
 [
     {
         "id": 1,
-        "question": "Let V be a finite-dimensional vector space and T: V \u2192 V a linear operator. Prove or disprove: If all eigenvalues of T have absolute value less than 1, then T^n \u2192 0 as n \u2192 \u221e (operator convergence).",
+        "question": "Let V be a finite-dimensional vector space and T: V -> V a linear operator. Prove or disprove: If all eigenvalues of T have absolute value less than 1, then T^n -> 0 as n -> infinity (operator convergence).",
         "domain": "Linear Algebra",
         "subdomain": "Spectral Theory",
         "complexity": "graduate"
     },
     {
         "id": 2,
-        "question": "Compute the fundamental group \u03c0\u2081(S\u00b9 \u2228 S\u00b9), where \u2228 denotes the wedge sum of topological spaces.",
+        "question": "Compute the fundamental group pi_1(S^1 v S^1), where v denotes the wedge sum of topological spaces.",
         "domain": "Topology",
         "subdomain": "Algebraic Topology",
         "complexity": "graduate"
     },
     {
         "id": 3,
-        "question": "Solve the PDE u_t = u_{xx} on (0,\u03c0)\u00d7(0,\u221e) with boundary conditions u(0,t)=0, u(\u03c0,t)=0 and initial condition u(x,0)=x(\u03c0\u2212x).",
+        "question": "Solve the PDE u_t = u_{xx} on (0, pi) x (0, infinity) with boundary conditions u(0,t)=0, u(pi,t)=0 and initial condition u(x,0)=x(pi-x).",
         "domain": "Partial Differential Equations",
         "subdomain": "Heat Equation",
         "complexity": "graduate"
     },
     {
         "id": 4,
-        "question": "Let (X,\ud835\udd05,\u03bc) be a measure space and f_n \u2192 f almost everywhere with |f_n| \u2264 g for an integrable function g. State and justify the theorem that guarantees \u222b f_n \u2192 \u222b f.",
+        "question": "Let (X, F, mu) be a measure space and f_n -> f almost everywhere with |f_n| <= g for an integrable function g. State and justify the theorem that guarantees integral f_n -> integral f.",
         "domain": "Real Analysis",
         "subdomain": "Lebesgue Integration",
         "complexity": "graduate"
     },
     {
         "id": 5,
-        "question": "Evaluate the integral \u222b_{\u211d} e^{\u2212x\u00b2} cos(ax) dx for a real parameter a.",
+        "question": "Evaluate the integral over R of e^{-x^2} cos(ax) dx for a real parameter a.",
         "domain": "Analysis",
         "subdomain": "Fourier Transforms",
         "complexity": "graduate"
     },
     {
         "id": 6,
-        "question": "Show that the series \u2211_{n=2}^\u221e 1/(n (ln n)^p) converges if and only if p > 1.",
+        "question": "Show that the series sum_{n=2}^infinity 1/(n (ln n)^p) converges if and only if p > 1.",
         "domain": "Real Analysis",
         "subdomain": "Series Convergence",
         "complexity": "graduate"
     },
     {
         "id": 7,
-        "question": "Given a compact Riemannian manifold (M,g), show that the Laplace\u2013Beltrami operator \u0394 has a discrete spectrum with eigenvalues 0 \u2264 \u03bb\u2081 \u2264 \u03bb\u2082 \u2264 ... \u2192 \u221e.",
+        "question": "Given a compact Riemannian manifold (M,g), show that the Laplace-Beltrami operator Delta has a discrete spectrum with eigenvalues 0 <= lambda_1 <= lambda_2 <= ... -> infinity.",
         "domain": "Differential Geometry",
         "subdomain": "Spectral Geometry",
         "complexity": "graduate"
     },
     {
         "id": 8,
-        "question": "Let G be a finite group acting on a set X. Prove Burnside\u2019s lemma for counting orbits: |X/G| = (1/|G|) \u2211_{g\u2208G} |Fix(g)|.",
+        "question": "Let G be a finite group acting on a set X. Prove Burnside's lemma for counting orbits: |X/G| = (1/|G|) sum_{g in G} |Fix(g)|.",
         "domain": "Abstract Algebra",
         "subdomain": "Group Actions",
         "complexity": "graduate"
     },
     {
         "id": 9,
-        "question": "Show that every bounded sequence in \u211d\u207f has a convergent subsequence.",
+        "question": "Show that every bounded sequence in R^n has a convergent subsequence.",
         "domain": "Real Analysis",
-        "subdomain": "Compactness (Bolzano\u2013Weierstrass)",
+        "subdomain": "Compactness (Bolzano-Weierstrass)",
         "complexity": "graduate"
     },
     {
         "id": 10,
-        "question": "In \u2102, determine all analytic functions f such that |f(z)| = |z| for all z.",
+        "question": "In C (complex numbers), determine all analytic functions f such that |f(z)| = |z| for all z.",
         "domain": "Complex Analysis",
         "subdomain": "Holomorphic Functions",
         "complexity": "graduate"

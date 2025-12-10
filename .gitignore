@@ -37,6 +37,7 @@ wheels/
 # OS
 .DS_Store
 Thumbs.db
+nul
 
 # Logs
 *.log
@@ -48,4 +49,3 @@ Thumbs.db
 # Model cache
 .cache/
 models/
-

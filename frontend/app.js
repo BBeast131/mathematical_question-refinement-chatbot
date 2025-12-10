@@ -28,7 +28,32 @@ document.addEventListener('DOMContentLoaded', () => {
             handleSend();
         }
     });
+    
+    // Check server connection on load
+    checkServerConnection();
 });
+
+/**
+ * Check if server is running
+ */
+async function checkServerConnection() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+        if (response.ok) {
+            setStatus('Connected to server', 'success');
+        } else {
+            setStatus('Server responded with error', 'error');
+        }
+    } catch (error) {
+        setStatus('Cannot connect to server - Make sure backend is running', 'error');
+        addMessage('bot', '⚠️ Warning: Cannot connect to backend server. Please make sure the server is running by executing: python run_server.py');
+    }
+}
 
 /**
  * Handle user message sending
@@ -65,8 +90,15 @@ async function handleSend() {
         }
     } catch (error) {
         console.error('Error:', error);
-        addMessage('bot', `Error: ${error.message}. Please try again.`);
-        setStatus('Error occurred', 'error');
+        let errorMessage = error.message;
+        
+        // Provide helpful error messages
+        if (errorMessage.includes('Cannot connect to server')) {
+            errorMessage = 'Cannot connect to backend server. Please:\n1. Make sure the server is running (python run_server.py)\n2. Check that it\'s running on http://localhost:8000\n3. Refresh this page and try again';
+        }
+        
+        addMessage('bot', `Error: ${errorMessage}`);
+        setStatus('Error occurred - Check server connection', 'error');
     }
 }
 
@@ -86,6 +118,11 @@ async function handleValidation(message) {
             },
             body: JSON.stringify({ message: message })
         });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Server error (${response.status}): ${errorText || response.statusText}`);
+        }
 
         const data = await response.json();
 
@@ -113,6 +150,9 @@ async function handleValidation(message) {
             setStatus('Waiting for revised question...', '');
         }
     } catch (error) {
+        if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+            throw new Error('Cannot connect to server. Make sure the backend server is running on http://localhost:8000');
+        }
         throw new Error(`Validation failed: ${error.message}`);
     }
 }
@@ -133,6 +173,11 @@ async function handleRefinement(question) {
             body: JSON.stringify({ message: question })
         });
 
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Server error (${response.status}): ${errorText || response.statusText}`);
+        }
+
         const data = await response.json();
         conversationState.refinedQuestion = data.refined_question;
         conversationState.phase = 'refined';
@@ -151,6 +196,9 @@ async function handleRefinement(question) {
         addActionButtons();
         setStatus('Review the refinement above', '');
     } catch (error) {
+        if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+            throw new Error('Cannot connect to server. Make sure the backend server is running on http://localhost:8000');
+        }
         throw new Error(`Refinement failed: ${error.message}`);
     }
 }
@@ -192,6 +240,11 @@ async function checkSimilarity(question) {
             body: JSON.stringify({ message: question })
         });
 
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Server error (${response.status}): ${errorText || response.statusText}`);
+        }
+
         const data = await response.json();
 
         if (data.similar_questions && data.similar_questions.length > 0) {
@@ -221,6 +274,9 @@ async function checkSimilarity(question) {
         addMessage('bot', '🎉 Process complete! You can enter a new question to start over.');
         setStatus('Ready for new question', 'success');
     } catch (error) {
+        if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+            throw new Error('Cannot connect to server. Make sure the backend server is running on http://localhost:8000');
+        }
         throw new Error(`Similarity check failed: ${error.message}`);
     }
 }

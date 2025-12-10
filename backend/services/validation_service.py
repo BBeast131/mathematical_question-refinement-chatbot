@@ -2,12 +2,18 @@
 Service for validating mathematical questions using LangChain and Groq
 """
 import os
+from pathlib import Path
+from dotenv import load_dotenv
 from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import PydanticOutputParser
 from pydantic import BaseModel, Field
 from typing import Dict, Any
 import logging
+
+# Load .env file from project root
+env_path = Path(__file__).parent.parent.parent / '.env'
+load_dotenv(dotenv_path=env_path)
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +35,7 @@ class ValidationService:
             raise ValueError("GROQ_API_KEY environment variable is not set")
         
         self.llm = ChatGroq(
-            model="llama-3.1-70b-versatile",
+            model="llama-3.3-70b-versatile",
             api_key=api_key,
             temperature=0.1  # Low temperature for consistent validation
         )
