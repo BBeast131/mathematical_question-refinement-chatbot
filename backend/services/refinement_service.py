@@ -9,10 +9,18 @@ from dotenv import load_dotenv
 from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import PydanticOutputParser
-from langchain_core.output_parsers import OutputFixingParser
 from pydantic import BaseModel, Field, ValidationError
 from typing import Dict, Any
 import logging
+
+# Try to import OutputFixingParser - it may be in different locations depending on langchain version
+try:
+    from langchain.output_parsers import OutputFixingParser
+except ImportError:
+    try:
+        from langchain_core.output_parsers import OutputFixingParser
+    except ImportError:
+        OutputFixingParser = None  # Will handle gracefully if not available
 
 # Load .env file from project root
 env_path = Path(__file__).parent.parent.parent / '.env'
@@ -115,16 +123,20 @@ OUTPUT FORMAT: You must respond ONLY with valid JSON in this exact format (no ma
         except (json.JSONDecodeError, ValidationError) as e:
             logger.debug(f"Fixed JSON parsing failed: {e}")
         
-        # Strategy 4: Use OutputFixingParser as last resort
-        try:
-            fixing_parser = OutputFixingParser.from_llm(
-                parser=self.output_parser,
-                llm=self.llm
-            )
-            return fixing_parser.parse(raw_output)
-        except Exception as e:
-            logger.error(f"All parsing strategies failed: {e}")
-            raise ValueError(f"Could not parse LLM output: {str(e)}")
+        # Strategy 4: Use OutputFixingParser as last resort (if available)
+        if OutputFixingParser is not None:
+            try:
+                fixing_parser = OutputFixingParser.from_llm(
+                    parser=self.output_parser,
+                    llm=self.llm
+                )
+                return fixing_parser.parse(raw_output)
+            except Exception as e:
+                logger.debug(f"OutputFixingParser failed: {e}")
+        
+        # If all strategies failed, raise error
+        logger.error(f"All parsing strategies failed. Raw output: {raw_output[:200]}...")
+        raise ValueError(f"Could not parse LLM output. Please check the format.")
     
     def _normalize_unicode_symbols(self, text: str) -> str:
         """Normalize Unicode mathematical symbols to LaTeX notation"""

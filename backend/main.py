@@ -92,6 +92,8 @@ class SimilarityResult(BaseModel):
 class SimilarityResponse(BaseModel):
     similar_questions: List[SimilarityResult]
     threshold: float = 0.8
+    exact_match_found: bool = False
+    exact_match_id: Optional[int] = None
 
 
 @app.get("/")
@@ -148,7 +150,11 @@ async def check_similarity(user_message: UserMessage):
     try:
         logger.info(f"Checking similarity for: {user_message.message[:100]}...")
         service = get_similarity_service()
-        results = await service.find_similar(user_message.message, threshold=0.8)
+        similarity_data = await service.find_similar(user_message.message, threshold=0.8, exclude_exact=True)
+        
+        results = similarity_data["results"]
+        exact_match_found = similarity_data.get("exact_match_found", False)
+        exact_match_id = similarity_data.get("exact_match_id")
         
         similar_questions = [
             SimilarityResult(
@@ -163,7 +169,9 @@ async def check_similarity(user_message: UserMessage):
         
         return SimilarityResponse(
             similar_questions=similar_questions,
-            threshold=0.8
+            threshold=0.8,
+            exact_match_found=exact_match_found,
+            exact_match_id=exact_match_id
         )
     except Exception as e:
         logger.error(f"Similarity check error: {str(e)}")

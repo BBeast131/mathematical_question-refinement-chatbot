@@ -1,7 +1,3 @@
-# Mathematical Question Refinement Chatbot
-
-A chatbot application that helps users refine their mathematical questions through validation, refinement, and similarity checking.
-
 ## How to Run
 
 ### Step 1: Install Dependencies
