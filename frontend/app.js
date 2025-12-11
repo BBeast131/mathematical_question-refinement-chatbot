@@ -247,6 +247,11 @@ async function checkSimilarity(question) {
 
         const data = await response.json();
 
+        // Check if exact match was found and excluded
+        if (data.exact_match_found) {
+            addMessage('bot', `ℹ️ Note: An exact match was found in the database (Question ID: ${data.exact_match_id}), but it has been excluded from the results below.`);
+        }
+
         if (data.similar_questions && data.similar_questions.length > 0) {
             addMessage('bot', `🔍 Found ${data.similar_questions.length} similar question(s) (similarity ≥ ${(data.threshold * 100).toFixed(0)}%):`);
             
@@ -267,7 +272,11 @@ async function checkSimilarity(question) {
             const lastBotMessage = chatMessages.querySelector('.bot-message:last-child .message-content');
             lastBotMessage.appendChild(similarityDiv);
         } else {
-            addMessage('bot', '✅ No similar questions found. Your question appears to be unique!');
+            if (data.exact_match_found) {
+                addMessage('bot', '✅ No other similar questions found. Your question matches an existing one in the database.');
+            } else {
+                addMessage('bot', '✅ No similar questions found. Your question appears to be unique!');
+            }
         }
 
         conversationState.phase = 'complete';
